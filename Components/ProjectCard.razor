@@ -1,0 +1,31 @@
+@using FoxbyteLabs.Models
+
+<article class="project-card">
+    <div class="project-card__top">
+        <h3 class="project-card__title">@Project.Name</h3>
+        <span class="status status--@StatusClass">@Project.Status</span>
+    </div>
+    <p class="project-card__description">@Project.Description</p>
+    @if (!string.IsNullOrWhiteSpace(Project.Url))
+    {
+        <a class="project-card__link"
+           href="@Project.Url"
+           target="_blank"
+           rel="noopener noreferrer">
+            View project
+        </a>
+    }
+</article>
+
+@code {
+    [Parameter, EditorRequired]
+    public LabProject Project { get; set; } = default!;
+
+    private string StatusClass => Project.Status.ToLowerInvariant() switch
+    {
+        "live" => "live",
+        "beta" => "beta",
+        "in development" => "dev",
+        _ => "default"
+    };
+}

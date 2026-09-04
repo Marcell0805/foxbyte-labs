@@ -1,0 +1,34 @@
+@using FoxbyteLabs.Models
+
+<section id="lab" class="section projects" aria-labelledby="projects-heading">
+    <div class="section__inner">
+        <header class="section__header">
+            <p class="section__eyebrow">In progress &amp; shipping</p>
+            <h2 id="projects-heading" class="section__title">Currently in the Lab</h2>
+            <p class="section__subtitle">
+                A handful of projects taking shape — some live, some still cooking.
+            </p>
+        </header>
+
+        <div class="project-grid">
+            @foreach (var project in Projects)
+            {
+                <ProjectCard Project="project" />
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    private static readonly LabProject[] Projects =
+    [
+        new("FFS — Financial Forecasting System", "Beta",
+            "Personal finance tracking, reports and goals."),
+        new("The Huntress Cookbook", "Live",
+            "A collaborative cookbook and recipe collection."),
+        new("Weekly Quest Log", "In Development",
+            "A shared gamified system for tracking weekly goals and quests."),
+        new("StreamForge", "Live",
+            "A useful tool/utility project.")
+    ];
+}

@@ -1,8 +1,20 @@
+@using FoxbyteLabs.Services
+
 <section class="hero" aria-labelledby="hero-heading">
     <div class="hero__atmosphere" aria-hidden="true"></div>
+    <div class="hero__glow" aria-hidden="true"></div>
+
     <div class="hero__content">
         <div class="hero__brand reveal">
-            <FoxMark CssClass="fox-mark--hero" />
+            <img class="hero__logo"
+                 src="images/logo.png"
+                 alt="Foxbyte Labs fox logo"
+                 width="128"
+                 height="128" />
+            <p class="hero__pulse-label">
+                <span class="pulse-dot" aria-hidden="true"></span>
+                Currently building
+            </p>
         </div>
 
         <h1 id="hero-heading" class="hero__title reveal reveal--delay-1">Foxbyte Labs</h1>
@@ -12,14 +24,19 @@
         </p>
 
         <p class="hero__lede reveal reveal--delay-3">
-            A personal creative space for apps, tools, experiments, and side projects —
-            built with care, shipped with curiosity.
+            A personal software workshop for apps, tools, experiments, and side projects —
+            handcrafted, useful, and a little curious.
         </p>
 
         <div class="hero__actions reveal reveal--delay-4">
-            <a class="btn btn--primary" href="#lab">Explore the Den</a>
+            <a class="btn btn--primary"
+               href="@ProjectService.DenHomeUrl"
+               target="_blank"
+               rel="noopener noreferrer">
+                Enter the Den
+            </a>
             <a class="btn btn--ghost"
-               href="https://github.com/marcell0805"
+               href="@ProjectService.GitHubProfileUrl"
                target="_blank"
                rel="noopener noreferrer">
                 GitHub

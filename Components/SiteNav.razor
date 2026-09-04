@@ -1,0 +1,47 @@
+@using FoxbyteLabs.Services
+
+<header class="site-nav @(Scrolled ? "site-nav--solid" : null)">
+    <div class="site-nav__inner">
+        <a class="site-nav__brand" href="#top" @onclick="CloseMenu">
+            <img class="site-nav__logo" src="images/logo.png" alt="" width="36" height="36" />
+            <span>Foxbyte Labs</span>
+        </a>
+
+        <button class="site-nav__toggle"
+                type="button"
+                aria-label="Menu"
+                aria-expanded="@MenuOpen"
+                @onclick="ToggleMenu">
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav class="site-nav__links @(MenuOpen ? "is-open" : null)" aria-label="Primary">
+            <a href="#lab" @onclick="CloseMenu">Projects</a>
+            <a href="#about" @onclick="CloseMenu">About</a>
+            <a href="@ProjectService.DenHomeUrl"
+               target="_blank"
+               rel="noopener noreferrer"
+               @onclick="CloseMenu">
+                The Den <span class="ext" aria-hidden="true">↗</span>
+            </a>
+            <a href="@ProjectService.GitHubProfileUrl"
+               target="_blank"
+               rel="noopener noreferrer"
+               @onclick="CloseMenu">
+                GitHub <span class="ext" aria-hidden="true">↗</span>
+            </a>
+        </nav>
+    </div>
+</header>
+
+@code {
+    [Parameter]
+    public bool Scrolled { get; set; }
+
+    private bool MenuOpen { get; set; }
+
+    private void ToggleMenu() => MenuOpen = !MenuOpen;
+
+    private void CloseMenu() => MenuOpen = false;
+}

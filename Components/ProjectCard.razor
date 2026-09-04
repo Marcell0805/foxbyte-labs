@@ -1,31 +1,83 @@
 @using FoxbyteLabs.Models
 
-<article class="project-card">
-    <div class="project-card__top">
+@if (IsLink)
+{
+    <a class="project-card @(Project.IsActive ? "project-card--active" : null)"
+       href="@Project.Url"
+       target="_blank"
+       rel="noopener noreferrer">
+        <div class="project-card__top">
+            <span class="status status--@StatusClass">
+                @if (Project.IsActive)
+                {
+                    <span class="pulse-dot pulse-dot--sm" aria-hidden="true"></span>
+                }
+                @Project.Status
+            </span>
+            <span class="project-card__arrow" aria-hidden="true">→</span>
+        </div>
+
         <h3 class="project-card__title">@Project.Name</h3>
-        <span class="status status--@StatusClass">@Project.Status</span>
-    </div>
-    <p class="project-card__description">@Project.Description</p>
-    @if (!string.IsNullOrWhiteSpace(Project.Url))
-    {
-        <a class="project-card__link"
-           href="@Project.Url"
-           target="_blank"
-           rel="noopener noreferrer">
-            View project
-        </a>
-    }
-</article>
+        <p class="project-card__description">@Project.Description</p>
+
+        <div class="project-card__meta">
+            <span class="project-card__category">@Project.Category</span>
+            @if (Project.Updated is not null)
+            {
+                <span class="project-card__updated">Updated @FormatUpdated(Project.Updated.Value)</span>
+            }
+        </div>
+    </a>
+}
+else
+{
+    <article class="project-card @(Project.IsActive ? "project-card--active" : null)">
+        <div class="project-card__top">
+            <span class="status status--@StatusClass">
+                @if (Project.IsActive)
+                {
+                    <span class="pulse-dot pulse-dot--sm" aria-hidden="true"></span>
+                }
+                @Project.Status
+            </span>
+        </div>
+
+        <h3 class="project-card__title">@Project.Name</h3>
+        <p class="project-card__description">@Project.Description</p>
+
+        <div class="project-card__meta">
+            <span class="project-card__category">@Project.Category</span>
+            @if (Project.Updated is not null)
+            {
+                <span class="project-card__updated">Updated @FormatUpdated(Project.Updated.Value)</span>
+            }
+        </div>
+    </article>
+}
 
 @code {
     [Parameter, EditorRequired]
     public LabProject Project { get; set; } = default!;
 
+    private bool IsLink => !string.IsNullOrWhiteSpace(Project.Url);
+
     private string StatusClass => Project.Status.ToLowerInvariant() switch
     {
         "live" => "live",
         "beta" => "beta",
-        "in development" => "dev",
+        "in progress" => "dev",
+        "experiment" => "experiment",
         _ => "default"
     };
+
+    private static string FormatUpdated(DateOnly date)
+    {
+        var days = DateOnly.FromDateTime(DateTime.UtcNow).DayNumber - date.DayNumber;
+        return days switch
+        {
+            <= 14 => "recently",
+            <= 45 => "this month",
+            _ => date.ToString("MMM yyyy")
+        };
+    }
 }

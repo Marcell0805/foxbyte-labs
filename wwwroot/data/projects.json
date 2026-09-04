@@ -1,0 +1,62 @@
+[
+  {
+    "id": "ffs",
+    "name": "FFS — Financial Forecasting System",
+    "description": "Local-first personal finance: transactions, reports, goals, and CSV export.",
+    "status": "Beta",
+    "url": "https://marcell0805.github.io/the-foxs-den-doc/sections/ffs.html",
+    "updated": "2026-09-01",
+    "featured": true,
+    "category": "Mobile App"
+  },
+  {
+    "id": "streamforge",
+    "name": "StreamForge",
+    "description": "Windows stream schedule builder with Steam/RAWG search and Discord announcements.",
+    "status": "Live",
+    "url": "https://marcell0805.github.io/the-foxs-den-doc/sections/streamforge.html",
+    "updated": "2026-08-27",
+    "featured": true,
+    "category": "Utility"
+  },
+  {
+    "id": "wid",
+    "name": "What Was I Doing",
+    "description": "Personal Windows time tracker with start/stop, manual entries, and reports.",
+    "status": "Live",
+    "url": "https://marcell0805.github.io/the-foxs-den-doc/sections/wid.html",
+    "updated": "2026-08-27",
+    "featured": true,
+    "category": "Utility"
+  },
+  {
+    "id": "huntress-cookbook",
+    "name": "The Huntress Cookbook",
+    "description": "Gluten-free, onion-free, IBS-conscious recipes — browse chapters online.",
+    "status": "Live",
+    "url": "https://marcell0805.github.io/huntress-cookbook/",
+    "updated": "2026-07-22",
+    "featured": true,
+    "category": "Web App"
+  },
+  {
+    "id": "active-huntress",
+    "name": "Active Huntress",
+    "description": "Offline workout checklist with history, trends, and backup.",
+    "status": "Live",
+    "url": "https://marcell0805.github.io/the-foxs-den-doc/sections/active-huntress.html",
+    "updated": "2026-07-15",
+    "featured": true,
+    "category": "Mobile App"
+  },
+  {
+    "id": "huntresscookbook-mobile",
+    "name": "Huntress Cookbook Mobile",
+    "description": "Offline Flutter cookbook with search, local edits, and dietary guides.",
+    "status": "Live",
+    "url": "https://marcell0805.github.io/the-foxs-den-doc/sections/huntresscookbook-mobile.html",
+    "updated": "2026-07-10",
+    "featured": true,
+    "category": "Mobile App"
+  }
+]

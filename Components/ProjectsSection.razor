@@ -1,34 +1,64 @@
 @using FoxbyteLabs.Models
+@using FoxbyteLabs.Services
+@inject ProjectService Projects
 
 <section id="lab" class="section projects" aria-labelledby="projects-heading">
     <div class="section__inner">
         <header class="section__header">
-            <p class="section__eyebrow">In progress &amp; shipping</p>
+            <p class="section__eyebrow">
+                <span class="pulse-dot pulse-dot--sm" aria-hidden="true"></span>
+                On the workbench
+            </p>
             <h2 id="projects-heading" class="section__title">Currently in the Lab</h2>
             <p class="section__subtitle">
-                A handful of projects taking shape — some live, some still cooking.
+                A handful of things currently taking shape.
             </p>
         </header>
 
-        <div class="project-grid">
-            @foreach (var project in Projects)
-            {
-                <ProjectCard Project="project" />
-            }
-        </div>
+        @if (_loading)
+        {
+            <div class="projects-state" role="status">Checking the workbench…</div>
+        }
+        else if (_projects.Count == 0)
+        {
+            <div class="projects-state projects-state--muted">
+                Projects will appear here soon.
+                <a href="@ProjectService.DenHomeUrl" target="_blank" rel="noopener noreferrer">
+                    Visit The Fox's Den
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="project-grid">
+                @foreach (var project in _projects)
+                {
+                    <ProjectCard Project="project" />
+                }
+            </div>
+        }
+
+        <p class="projects-den-link">
+            <a href="@ProjectService.DenHomeUrl" target="_blank" rel="noopener noreferrer">
+                View all projects in The Den <span aria-hidden="true">→</span>
+            </a>
+        </p>
     </div>
 </section>
 
 @code {
-    private static readonly LabProject[] Projects =
-    [
-        new("FFS — Financial Forecasting System", "Beta",
-            "Personal finance tracking, reports and goals."),
-        new("The Huntress Cookbook", "Live",
-            "A collaborative cookbook and recipe collection."),
-        new("Weekly Quest Log", "In Development",
-            "A shared gamified system for tracking weekly goals and quests."),
-        new("StreamForge", "Live",
-            "A useful tool/utility project.")
-    ];
+    private bool _loading = true;
+    private IReadOnlyList<LabProject> _projects = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _projects = await Projects.GetFeaturedProjectsAsync();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
 }

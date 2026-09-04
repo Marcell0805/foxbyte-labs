@@ -1,7 +1,14 @@
+@using FoxbyteLabs.Services
+
 <footer class="site-footer">
     <div class="site-footer__inner">
         <p class="site-footer__text">
             © @Year Foxbyte Labs · Built with curiosity 🦊
+        </p>
+        <p class="site-footer__links">
+            <a href="@ProjectService.DenHomeUrl" target="_blank" rel="noopener noreferrer">The Den</a>
+            <span aria-hidden="true">·</span>
+            <a href="@ProjectService.GitHubProfileUrl" target="_blank" rel="noopener noreferrer">GitHub</a>
         </p>
     </div>
 </footer>

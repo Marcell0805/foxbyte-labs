@@ -1,5 +1,53 @@
 ﻿@inherits LayoutComponentBase
+@implements IAsyncDisposable
+@inject IJSRuntime Js
 
-<div class="site-shell">
-    @Body
+<div class="site-shell" id="top">
+    <div class="lab-grid" aria-hidden="true"></div>
+    <SiteNav Scrolled="_scrolled" />
+    <main>
+        @Body
+    </main>
 </div>
+
+@code {
+    private bool _scrolled;
+    private DotNetObjectReference<MainLayout>? _self;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            return;
+        }
+
+        _self = DotNetObjectReference.Create(this);
+        await Js.InvokeVoidAsync("foxbyteNav.init", _self);
+    }
+
+    [JSInvokable]
+    public void OnScrollChanged(bool scrolled)
+    {
+        if (_scrolled == scrolled)
+        {
+            return;
+        }
+
+        _scrolled = scrolled;
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await Js.InvokeVoidAsync("foxbyteNav.dispose");
+        }
+        catch (JSDisconnectedException)
+        {
+            // app shutting down
+        }
+
+        _self?.Dispose();
+    }
+}

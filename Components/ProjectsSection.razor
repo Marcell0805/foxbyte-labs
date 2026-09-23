@@ -11,7 +11,7 @@
             </p>
             <h2 id="projects-heading" class="section__title">Currently in the Lab</h2>
             <p class="section__subtitle">
-                A handful of things currently taking shape.
+                Every app, tool, and experiment in one catalog — search as the workshop grows.
             </p>
         </header>
 
@@ -30,17 +30,76 @@
         }
         else
         {
-            <div class="project-grid">
-                @foreach (var project in _projects)
+            <div class="catalog-toolbar">
+                <label class="catalog-search">
+                    <span class="visually-hidden">Search projects</span>
+                    <input type="search"
+                           id="lab-search"
+                           class="catalog-search__input"
+                           placeholder="Search by name, category, or status…"
+                           autocomplete="off"
+                           spellcheck="false"
+                           value="@_query"
+                           @oninput="OnQueryChanged"
+                           @onkeydown="OnSearchKeyDown" />
+                    @if (!string.IsNullOrWhiteSpace(_query))
+                    {
+                        <button type="button"
+                                class="catalog-search__clear"
+                                aria-label="Clear search"
+                                @onclick="ClearQuery">
+                            ×
+                        </button>
+                    }
+                </label>
+
+                @if (_categories.Count > 1)
                 {
-                    <ProjectCard Project="project" />
+                    <div class="catalog-filters" role="group" aria-label="Filter by category">
+                        <button type="button"
+                                class="catalog-chip @(_category is null ? "is-active" : null)"
+                                @onclick="@(() => SetCategory(null))">
+                            All
+                        </button>
+                        @foreach (var category in _categories)
+                        {
+                            <button type="button"
+                                    class="catalog-chip @(_category == category ? "is-active" : null)"
+                                    @onclick="@(() => SetCategory(category))">
+                                @category
+                            </button>
+                        }
+                    </div>
                 }
+
+                <p class="catalog-count" aria-live="polite">
+                    @ResultLabel
+                </p>
             </div>
+
+            @if (_visible.Count == 0)
+            {
+                <div class="projects-state projects-state--muted">
+                    Nothing matches that search.
+                    <button type="button" class="catalog-reset" @onclick="ResetFilters">
+                        Clear filters
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="project-grid">
+                    @foreach (var project in _visible)
+                    {
+                        <ProjectCard Project="project" />
+                    }
+                </div>
+            }
         }
 
         <p class="projects-den-link">
             <a href="@ProjectService.DenHomeUrl" target="_blank" rel="noopener noreferrer">
-                View all projects in The Den <span aria-hidden="true">→</span>
+                Full write-ups live in The Den <span aria-hidden="true">→</span>
             </a>
         </p>
     </div>
@@ -48,17 +107,107 @@
 
 @code {
     private bool _loading = true;
+    private string _query = "";
+    private string? _category;
     private IReadOnlyList<LabProject> _projects = [];
+    private IReadOnlyList<string> _categories = [];
+    private IReadOnlyList<LabProject> _visible = [];
+
+    private string ResultLabel
+    {
+        get
+        {
+            var filtered = HasActiveFilter;
+            if (!filtered)
+                return _projects.Count == 1 ? "1 project" : $"{_projects.Count} projects";
+
+            return _visible.Count == 1
+                ? $"1 of {_projects.Count} matching"
+                : $"{_visible.Count} of {_projects.Count} matching";
+        }
+    }
+
+    private bool HasActiveFilter =>
+        !string.IsNullOrWhiteSpace(_query) || _category is not null;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            _projects = await Projects.GetFeaturedProjectsAsync();
+            _projects = (await Projects.GetProjectsAsync())
+                .OrderByDescending(p => p.IsActive)
+                .ThenByDescending(p => p.Updated)
+                .ThenBy(p => p.Name)
+                .ToList();
+
+            _categories = _projects
+                .Select(p => p.Category)
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(c => c, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            ApplyFilter();
         }
         finally
         {
             _loading = false;
         }
     }
+
+    private void OnQueryChanged(ChangeEventArgs e)
+    {
+        _query = e.Value?.ToString() ?? "";
+        ApplyFilter();
+    }
+
+    private void OnSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+            ClearQuery();
+    }
+
+    private void SetCategory(string? category)
+    {
+        _category = category;
+        ApplyFilter();
+    }
+
+    private void ClearQuery()
+    {
+        _query = "";
+        ApplyFilter();
+    }
+
+    private void ResetFilters()
+    {
+        _query = "";
+        _category = null;
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        var query = _query.Trim();
+        IEnumerable<LabProject> next = _projects;
+
+        if (_category is not null)
+            next = next.Where(p => p.Category.Equals(_category, StringComparison.OrdinalIgnoreCase));
+
+        if (query.Length > 0)
+            next = next.Where(p => Matches(p, query));
+
+        _visible = next.ToList();
+    }
+
+    private static bool Matches(LabProject project, string query) =>
+        Contains(project.Name, query) ||
+        Contains(project.Description, query) ||
+        Contains(project.Category, query) ||
+        Contains(project.Status, query) ||
+        Contains(project.Id, query);
+
+    private static bool Contains(string? value, string query) =>
+        !string.IsNullOrWhiteSpace(value) &&
+        value.Contains(query, StringComparison.OrdinalIgnoreCase);
 }

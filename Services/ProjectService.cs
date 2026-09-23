@@ -6,8 +6,10 @@ namespace FoxbyteLabs.Services;
 
 public sealed class ProjectService
 {
-    public const string DenHomeUrl = "https://marcell0805.github.io/the-foxs-den-doc/";
-    public const string DenManifestUrl = "https://marcell0805.github.io/the-foxs-den-doc/data/apps-manifest.json";
+    public const string DenHomeUrl = "https://den.foxbytelabs.co.za/";
+    public const string DenManifestUrl = "https://den.foxbytelabs.co.za/data/apps-manifest.json";
+    public const string FfsUrl = "https://ffs.foxbytelabs.co.za/";
+    public const string CookbookUrl = "https://hcbw.foxbytelabs.co.za/";
     public const string GitHubProfileUrl = "https://github.com/Marcell0805";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -17,6 +19,7 @@ public sealed class ProjectService
 
     private readonly HttpClient _http;
     private IReadOnlyList<LabProject>? _cache;
+    private IReadOnlyList<LabDestination>? _destinations;
     private string _source = "none";
 
     public ProjectService(HttpClient http)
@@ -36,6 +39,24 @@ public sealed class ProjectService
             .ThenBy(p => p.Name)
             .Take(take)
             .ToList();
+    }
+
+    public async Task<IReadOnlyList<LabDestination>> GetDestinationsAsync(CancellationToken ct = default)
+    {
+        if (_destinations is not null)
+            return _destinations;
+
+        try
+        {
+            var destinations = await _http.GetFromJsonAsync<List<LabDestination>>("data/destinations.json", JsonOptions, ct);
+            _destinations = destinations ?? [];
+        }
+        catch
+        {
+            _destinations = [];
+        }
+
+        return _destinations;
     }
 
     public async Task<IReadOnlyList<LabProject>> GetProjectsAsync(CancellationToken ct = default)
@@ -124,9 +145,7 @@ public sealed class ProjectService
             Name = app.Title,
             Description = description,
             Status = NormalizeStatus(app.Status),
-            Url = !string.IsNullOrWhiteSpace(app.ExternalUrl)
-                ? app.ExternalUrl
-                : $"{DenHomeUrl}sections/{app.Id}.html",
+            Url = ResolveUrl(app),
             Updated = updated,
             Featured = true,
             Category = CategoryFromKind(app.Kind)
@@ -149,6 +168,17 @@ public sealed class ProjectService
         "tool" => "Utility",
         _ => "Project"
     };
+
+    private static string ResolveUrl(DenAppEntry app)
+    {
+        if (app.Id.Equals("ffs", StringComparison.OrdinalIgnoreCase))
+            return FfsUrl;
+        if (app.Id.Equals("huntress-cookbook", StringComparison.OrdinalIgnoreCase))
+            return CookbookUrl;
+        if (!string.IsNullOrWhiteSpace(app.ExternalUrl))
+            return app.ExternalUrl;
+        return $"{DenHomeUrl}sections/{app.Id}.html";
+    }
 
     private static string? FirstNonEmpty(params string?[] values) =>
         values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v));

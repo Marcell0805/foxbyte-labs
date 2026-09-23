@@ -1,0 +1,22 @@
+@using FoxbyteLabs.Models
+
+<a class="destination-card" href="@Destination.Url">
+    <img class="destination-card__icon"
+         src="@Destination.Icon"
+         alt=""
+         width="56"
+         height="56" />
+    <div class="destination-card__copy">
+        <p class="destination-card__eyebrow">@Destination.Eyebrow</p>
+        <h3 class="destination-card__title">@Destination.Title</h3>
+        <p class="destination-card__detail">@Destination.Detail</p>
+    </div>
+    <span class="btn btn--ghost destination-card__cta">
+        @Destination.Cta <span aria-hidden="true">→</span>
+    </span>
+</a>
+
+@code {
+    [Parameter, EditorRequired]
+    public LabDestination Destination { get; set; } = default!;
+}

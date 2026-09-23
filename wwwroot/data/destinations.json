@@ -1,0 +1,29 @@
+[
+  {
+    "id": "den",
+    "eyebrow": "The Den",
+    "title": "The Fox’s Den",
+    "detail": "Portfolio, apps, tools, and experiments.",
+    "url": "https://den.foxbytelabs.co.za/",
+    "icon": "images/destinations/den.png",
+    "cta": "Visit the Den"
+  },
+  {
+    "id": "ffs",
+    "eyebrow": "Web app",
+    "title": "F.F.S",
+    "detail": "Financial Forecasting System. Plan, track, and take control.",
+    "url": "https://ffs.foxbytelabs.co.za/",
+    "icon": "images/destinations/ffs.png",
+    "cta": "Open F.F.S"
+  },
+  {
+    "id": "huntress-cookbook",
+    "eyebrow": "Website",
+    "title": "Huntress Cookbook",
+    "detail": "Recipes, notes, and the Huntress Cookbook experience.",
+    "url": "https://hcbw.foxbytelabs.co.za/",
+    "icon": "images/destinations/huntress-cookbook.png",
+    "cta": "Open cookbook"
+  }
+]

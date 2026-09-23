@@ -1,0 +1,189 @@
+@using FoxbyteLabs.Models
+@using FoxbyteLabs.Services
+@inject ProjectService Projects
+
+<section id="enter" class="section destinations" aria-labelledby="destinations-heading">
+    <div class="section__inner">
+        <div class="destinations__frame">
+            <header class="destinations__header">
+                <p class="section__eyebrow">Explore the workshop</p>
+                <h2 id="destinations-heading" class="section__title">Main destinations</h2>
+                <p class="section__subtitle">Search and open any live experience as the workshop grows.</p>
+            </header>
+
+            @if (_loading)
+            {
+                <div class="projects-state" role="status">Loading destinations…</div>
+            }
+            else if (_destinations.Count == 0)
+            {
+                <div class="projects-state projects-state--muted">Destinations will appear here soon.</div>
+            }
+            else
+            {
+                <div class="catalog-toolbar destinations__toolbar">
+                    <label class="catalog-search">
+                        <span class="visually-hidden">Search destinations</span>
+                        <input type="search"
+                               id="destination-search"
+                               class="catalog-search__input"
+                               placeholder="Search destinations…"
+                               autocomplete="off"
+                               spellcheck="false"
+                               value="@_query"
+                               @oninput="OnQueryChanged"
+                               @onkeydown="OnSearchKeyDown" />
+                        @if (!string.IsNullOrWhiteSpace(_query))
+                        {
+                            <button type="button"
+                                    class="catalog-search__clear"
+                                    aria-label="Clear search"
+                                    @onclick="ClearQuery">
+                                ×
+                            </button>
+                        }
+                    </label>
+
+                    @if (_kinds.Count > 1)
+                    {
+                        <div class="catalog-filters" role="group" aria-label="Filter destinations">
+                            <button type="button"
+                                    class="catalog-chip @(_kind is null ? "is-active" : null)"
+                                    @onclick="@(() => SetKind(null))">
+                                All
+                            </button>
+                            @foreach (var kind in _kinds)
+                            {
+                                <button type="button"
+                                        class="catalog-chip @(_kind == kind ? "is-active" : null)"
+                                        @onclick="@(() => SetKind(kind))">
+                                    @kind
+                                </button>
+                            }
+                        </div>
+                    }
+
+                    <p class="catalog-count" aria-live="polite">@ResultLabel</p>
+                </div>
+
+                @if (_visible.Count == 0)
+                {
+                    <div class="projects-state projects-state--muted">
+                        Nothing matches that search.
+                        <button type="button" class="catalog-reset" @onclick="ResetFilters">
+                            Clear filters
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="destinations__grid">
+                        @foreach (var destination in _visible)
+                        {
+                            <DestinationCard Destination="destination" />
+                        }
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    private bool _loading = true;
+    private string _query = "";
+    private string? _kind;
+    private IReadOnlyList<LabDestination> _destinations = [];
+    private IReadOnlyList<string> _kinds = [];
+    private IReadOnlyList<LabDestination> _visible = [];
+
+    private string ResultLabel
+    {
+        get
+        {
+            if (!HasActiveFilter)
+                return _destinations.Count == 1 ? "1 destination" : $"{_destinations.Count} destinations";
+
+            return _visible.Count == 1
+                ? $"1 of {_destinations.Count} matching"
+                : $"{_visible.Count} of {_destinations.Count} matching";
+        }
+    }
+
+    private bool HasActiveFilter =>
+        !string.IsNullOrWhiteSpace(_query) || _kind is not null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _destinations = await Projects.GetDestinationsAsync();
+            _kinds = _destinations
+                .Select(d => d.Eyebrow)
+                .Where(k => !string.IsNullOrWhiteSpace(k))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            ApplyFilter();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void OnQueryChanged(ChangeEventArgs e)
+    {
+        _query = e.Value?.ToString() ?? "";
+        ApplyFilter();
+    }
+
+    private void OnSearchKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+            ClearQuery();
+    }
+
+    private void SetKind(string? kind)
+    {
+        _kind = kind;
+        ApplyFilter();
+    }
+
+    private void ClearQuery()
+    {
+        _query = "";
+        ApplyFilter();
+    }
+
+    private void ResetFilters()
+    {
+        _query = "";
+        _kind = null;
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        var query = _query.Trim();
+        IEnumerable<LabDestination> next = _destinations;
+
+        if (_kind is not null)
+            next = next.Where(d => d.Eyebrow.Equals(_kind, StringComparison.OrdinalIgnoreCase));
+
+        if (query.Length > 0)
+            next = next.Where(d => Matches(d, query));
+
+        _visible = next.ToList();
+    }
+
+    private static bool Matches(LabDestination destination, string query) =>
+        Contains(destination.Title, query) ||
+        Contains(destination.Detail, query) ||
+        Contains(destination.Eyebrow, query) ||
+        Contains(destination.Cta, query) ||
+        Contains(destination.Id, query);
+
+    private static bool Contains(string? value, string query) =>
+        !string.IsNullOrWhiteSpace(value) &&
+        value.Contains(query, StringComparison.OrdinalIgnoreCase);
+}

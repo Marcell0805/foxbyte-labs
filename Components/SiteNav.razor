@@ -17,6 +17,7 @@
         </button>
 
         <nav class="site-nav__links @(MenuOpen ? "is-open" : null)" aria-label="Primary">
+            <a href="#enter" @onclick="CloseMenu">Destinations</a>
             <a href="#lab" @onclick="CloseMenu">Projects</a>
             <a href="#about" @onclick="CloseMenu">About</a>
             <a href="@ProjectService.DenHomeUrl"

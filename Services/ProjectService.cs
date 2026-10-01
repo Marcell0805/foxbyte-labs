@@ -171,9 +171,13 @@ public sealed class ProjectService
 
     private static string ResolveUrl(DenAppEntry app)
     {
-        if (app.Id.Equals("ffs", StringComparison.OrdinalIgnoreCase))
+        var kind = app.Kind?.Trim().ToLowerInvariant();
+        var isWebsite = kind is "website" or "web";
+
+        // Mobile FFS stays on its Den listing. Only a website entry opens the live app.
+        if (app.Id.Equals("ffs", StringComparison.OrdinalIgnoreCase) && isWebsite)
             return FfsUrl;
-        if (app.Id.Equals("huntress-cookbook", StringComparison.OrdinalIgnoreCase))
+        if (app.Id.Equals("huntress-cookbook", StringComparison.OrdinalIgnoreCase) && isWebsite)
             return CookbookUrl;
         if (!string.IsNullOrWhiteSpace(app.ExternalUrl))
             return app.ExternalUrl;

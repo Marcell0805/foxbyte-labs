@@ -4,10 +4,10 @@
     "name": "FFS — Financial Forecasting System",
     "description": "Local-first personal finance: transactions, reports, goals, and CSV export.",
     "status": "Beta",
-    "url": "https://ffs.foxbytelabs.co.za/",
+    "url": "https://den.foxbytelabs.co.za/sections/ffs.html",
     "updated": "2026-09-01",
     "featured": true,
-    "category": "Web App"
+    "category": "Mobile App"
   },
   {
     "id": "streamforge",

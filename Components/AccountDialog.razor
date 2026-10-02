@@ -1,0 +1,24 @@
+@if (Open)
+{
+    <div class="door-account" role="presentation" @onclick="Close">
+        <div class="door-account__card" role="dialog" aria-modal="true" aria-labelledby="account-heading" @onclick:stopPropagation="true">
+            <p class="door-kicker">Coming soon</p>
+            <h2 id="account-heading">Foxbyte Account</h2>
+            <p>
+                Accounts are coming to the workshop.
+                Soon you'll be able to sign in and manage your Foxbyte services and projects.
+            </p>
+            <button type="button" class="btn btn--primary" @onclick="Close">Coming soon</button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private Task Close() => OnClose.InvokeAsync();
+}

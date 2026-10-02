@@ -6,8 +6,16 @@ namespace FoxbyteLabs.Services;
 
 public sealed class ProjectService
 {
-    public const string DenHomeUrl = "https://den.foxbytelabs.co.za/";
-    public const string DenManifestUrl = "https://den.foxbytelabs.co.za/data/apps-manifest.json";
+    public const string LiveDenHomeUrl = "https://den.foxbytelabs.co.za/";
+
+#if DEBUG
+    // Local Den: serve portal/ (for example `python -m http.server 8765` from that folder).
+    public const string DenHomeUrl = "http://localhost:8765/";
+#else
+    public const string DenHomeUrl = LiveDenHomeUrl;
+#endif
+
+    public static string DenManifestUrl => $"{DenHomeUrl}data/apps-manifest.json";
     public const string FfsUrl = "https://ffs.foxbytelabs.co.za/";
     public const string CookbookUrl = "https://hcbw.foxbytelabs.co.za/";
     public const string GitHubProfileUrl = "https://github.com/Marcell0805";
@@ -49,6 +57,12 @@ public sealed class ProjectService
         try
         {
             var destinations = await _http.GetFromJsonAsync<List<LabDestination>>("data/destinations.json", JsonOptions, ct);
+            if (destinations is not null)
+            {
+                foreach (var destination in destinations)
+                    destination.Url = LocalizeDenUrl(destination.Url);
+            }
+
             _destinations = destinations ?? [];
         }
         catch
@@ -112,6 +126,12 @@ public sealed class ProjectService
         try
         {
             var projects = await _http.GetFromJsonAsync<List<LabProject>>("data/projects.json", JsonOptions, ct);
+            if (projects is not null)
+            {
+                foreach (var project in projects)
+                    project.Url = LocalizeDenUrl(project.Url);
+            }
+
             return projects ?? [];
         }
         catch
@@ -165,7 +185,8 @@ public sealed class ProjectService
     {
         "mobile" => "Mobile App",
         "website" or "web" => "Web App",
-        "tool" => "Utility",
+        "tool" => "Desktop Tool",
+        "addon" or "add-on" or "extension" => "Browser Add-on",
         _ => "Project"
     };
 
@@ -180,8 +201,20 @@ public sealed class ProjectService
         if (app.Id.Equals("huntress-cookbook", StringComparison.OrdinalIgnoreCase) && isWebsite)
             return CookbookUrl;
         if (!string.IsNullOrWhiteSpace(app.ExternalUrl))
-            return app.ExternalUrl;
+            return LocalizeDenUrl(app.ExternalUrl);
         return $"{DenHomeUrl}sections/{app.Id}.html";
+    }
+
+    private static string LocalizeDenUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return url ?? "";
+
+        const string live = "https://den.foxbytelabs.co.za";
+        if (!url.StartsWith(live, StringComparison.OrdinalIgnoreCase))
+            return url;
+
+        return DenHomeUrl.TrimEnd('/') + url[live.Length..];
     }
 
     private static string? FirstNonEmpty(params string?[] values) =>

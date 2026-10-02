@@ -1,0 +1,44 @@
+@using FoxbyteLabs.Services
+@inject ProjectService Projects
+
+<section class="door-den" aria-labelledby="den-heading">
+    <div class="door-den__photo">
+        <img src="images/workshop/evening.png" alt="" />
+        <p><em>Everything I've built, collected in one place.</em></p>
+    </div>
+    <div class="door-den__copy">
+        <p class="door-kicker">The Fox's Den</p>
+        <h2 id="den-heading">The complete collection.</h2>
+        <p>
+            The Fox's Den is the catalogue of everything I've built —
+            apps, websites, desktop tools and browser add-ons.
+            Search, explore, and dive into the details.
+        </p>
+        <a class="btn btn--primary" href="@ProjectService.DenHomeUrl" target="_blank" rel="noopener noreferrer">
+            Enter The Den <span aria-hidden="true">→</span>
+        </a>
+    </div>
+    <ul class="door-den__stats">
+        <li>
+            <Mark Name="box" />
+            <span class="door-den__line"><strong>@_projectCount</strong> Projects</span>
+        </li>
+        <li>
+            <Mark Name="folder" />
+            <span class="door-den__line"><strong>4</strong> Categories</span>
+        </li>
+        <li>
+            <Mark Name="search" />
+            <span class="door-den__line"><strong>@_projectCount</strong> Detailed project pages</span>
+        </li>
+    </ul>
+</section>
+
+@code {
+    private int _projectCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _projectCount = (await Projects.GetProjectsAsync()).Count;
+    }
+}

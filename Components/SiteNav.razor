@@ -1,10 +1,14 @@
 @using FoxbyteLabs.Services
+@inject IJSRuntime Js
 
 <header class="site-nav @(Scrolled ? "site-nav--solid" : null)">
     <div class="site-nav__inner">
         <a class="site-nav__brand" href="#top" @onclick="CloseMenu">
             <img class="site-nav__logo" src="images/logo.png" alt="" width="36" height="36" />
-            <span>Foxbyte Labs</span>
+            <span class="site-nav__name">
+                Foxbyte Labs
+                <small>Independent software studio</small>
+            </span>
         </a>
 
         <button class="site-nav__toggle"
@@ -20,29 +24,38 @@
             <a href="#enter" @onclick="CloseMenu">Destinations</a>
             <a href="#lab" @onclick="CloseMenu">Projects</a>
             <a href="#about" @onclick="CloseMenu">About</a>
-            <a href="@ProjectService.DenHomeUrl"
-               target="_blank"
-               rel="noopener noreferrer"
-               @onclick="CloseMenu">
-                The Den <span class="ext" aria-hidden="true">↗</span>
-            </a>
-            <a href="@ProjectService.GitHubProfileUrl"
-               target="_blank"
-               rel="noopener noreferrer"
-               @onclick="CloseMenu">
-                GitHub <span class="ext" aria-hidden="true">↗</span>
-            </a>
+            <a href="@ProjectService.DenHomeUrl" target="_blank" rel="noopener noreferrer" @onclick="CloseMenu">The Den</a>
+            <a href="@ProjectService.GitHubProfileUrl" target="_blank" rel="noopener noreferrer" @onclick="CloseMenu">GitHub</a>
+            <button type="button" class="site-nav__tool" @onclick="FocusSearch">Search</button>
+            <button type="button" class="site-nav__login" @onclick="OpenAccount">Log in</button>
         </nav>
     </div>
 </header>
+
+<AccountDialog Open="_accountOpen" OnClose="CloseAccount" />
 
 @code {
     [Parameter]
     public bool Scrolled { get; set; }
 
     private bool MenuOpen { get; set; }
+    private bool _accountOpen;
 
     private void ToggleMenu() => MenuOpen = !MenuOpen;
 
     private void CloseMenu() => MenuOpen = false;
+
+    private async Task FocusSearch()
+    {
+        MenuOpen = false;
+        await Js.InvokeVoidAsync("foxbyteNav.focusSearch");
+    }
+
+    private void OpenAccount()
+    {
+        MenuOpen = false;
+        _accountOpen = true;
+    }
+
+    private void CloseAccount() => _accountOpen = false;
 }

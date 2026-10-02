@@ -17,7 +17,7 @@
     "url": "https://den.foxbytelabs.co.za/sections/streamforge.html",
     "updated": "2026-08-27",
     "featured": true,
-    "category": "Utility"
+    "category": "Desktop Tool"
   },
   {
     "id": "wid",
@@ -27,7 +27,7 @@
     "url": "https://den.foxbytelabs.co.za/sections/wid.html",
     "updated": "2026-08-27",
     "featured": true,
-    "category": "Utility"
+    "category": "Desktop Tool"
   },
   {
     "id": "huntress-cookbook",
@@ -58,5 +58,15 @@
     "updated": "2026-07-10",
     "featured": true,
     "category": "Mobile App"
+  },
+  {
+    "id": "foxfill",
+    "name": "FoxFill",
+    "description": "Privacy-first form filling from a local profile. Scan, review, then fill.",
+    "status": "Live",
+    "url": "https://den.foxbytelabs.co.za/sections/foxfill.html",
+    "updated": "2026-10-01",
+    "featured": true,
+    "category": "Browser Add-on"
   }
 ]

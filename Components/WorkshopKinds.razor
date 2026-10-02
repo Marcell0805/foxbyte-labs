@@ -1,0 +1,55 @@
+@using FoxbyteLabs.Services
+@inject ProjectService Projects
+
+<section id="lab" class="door-kinds" aria-labelledby="kinds-heading">
+    <header class="door-kinds__head">
+        <div>
+            <p class="door-kicker">Explore the workshop</p>
+            <h2 id="kinds-heading">Different tools for different ideas.</h2>
+            <p>From practical apps to experimental tools — all built by the same curious mind.</p>
+        </div>
+        <a href="@ProjectService.DenHomeUrl" target="_blank" rel="noopener noreferrer">View all projects <span aria-hidden="true">→</span></a>
+    </header>
+    <div class="door-kinds__grid">
+        @foreach (var kind in _kinds)
+        {
+            <a class="door-kind" href="@ProjectService.DenHomeUrl" target="_blank" rel="noopener noreferrer">
+                <img src="@kind.Image" alt="" />
+                <span class="door-kind__body">
+                    <span class="door-kind__title">
+                        <Mark Name="@kind.Icon" />
+                        <strong>@kind.Title</strong>
+                        <span class="door-kind__go" aria-hidden="true">→</span>
+                    </span>
+                    <span class="door-kind__blurb">@kind.Blurb</span>
+                    <span class="door-kind__count">@kind.Count @(kind.Count == 1 ? "project" : "projects")</span>
+                </span>
+            </a>
+        }
+    </div>
+</section>
+
+@code {
+    private static readonly (string Category, string Title, string Blurb, string Icon, string Image)[] Definitions =
+    [
+        ("Mobile App", "Mobile Apps", "Personal tools for everyday problems.", "phone", "images/kinds/mobile.jpg"),
+        ("Web App", "Websites", "Web experiences and online projects.", "globe", "images/kinds/web.jpg"),
+        ("Desktop Tool", "Desktop Tools", "Windows tools to make things easier.", "monitor", "images/kinds/desktop.jpg"),
+        ("Browser Add-on", "Browser Add-ons", "Small utilities for a better browsing experience.", "puzzle", "images/kinds/extension.jpg")
+    ];
+
+    private IReadOnlyList<(string Title, string Blurb, string Icon, string Image, int Count)> _kinds = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        var projects = await Projects.GetProjectsAsync();
+        _kinds = Definitions
+            .Select(def => (
+                def.Title,
+                def.Blurb,
+                def.Icon,
+                def.Image,
+                projects.Count(p => p.Category.Equals(def.Category, StringComparison.OrdinalIgnoreCase))))
+            .ToList();
+    }
+}

@@ -1,46 +1,182 @@
+@using FoxbyteLabs.Models
 @using FoxbyteLabs.Services
+@inject ProjectService Projects
+@inject IJSRuntime Js
+@implements IDisposable
 
-<section class="hero" aria-labelledby="hero-heading">
-    <div class="hero__atmosphere" aria-hidden="true"></div>
-    <div class="hero__glow" aria-hidden="true"></div>
+<section class="door-hero" aria-labelledby="hero-heading">
+    <div class="door-hero__stage" aria-hidden="true">
+        @if (_outgoing is not null)
+        {
+            <img class="door-hero__photo is-out" src="@WorkshopClock.Image(_outgoing)" alt="" />
+        }
+        <img class="door-hero__photo is-on" src="@WorkshopClock.Image(_slot)" alt="" />
+        <div class="door-hero__shade"></div>
+    </div>
 
-    <div class="hero__content">
-        <div class="hero__brand reveal">
-            <img class="hero__logo"
-                 src="images/logo.png"
-                 alt="Foxbyte Labs fox logo"
-                 width="128"
-                 height="128" />
-            <p class="hero__pulse-label">
-                <span class="pulse-dot" aria-hidden="true"></span>
-                Currently building
-            </p>
-        </div>
-
-        <h1 id="hero-heading" class="hero__title reveal reveal--delay-1">Foxbyte Labs</h1>
-
-        <p class="hero__tagline reveal reveal--delay-2">
-            Building useful things, one curious idea at a time.
-        </p>
-
-        <p class="hero__lede reveal reveal--delay-3">
-            A personal software workshop for apps, tools, experiments, and side projects —
+    <div class="door-hero__content">
+        <p class="door-kicker">Independent software studio</p>
+        <h1 id="hero-heading">Foxbyte Labs</h1>
+        <p class="door-hero__tagline">Building useful things, one curious idea at a time.</p>
+        <p class="door-hero__lede">
+            A small independent software workshop for apps, websites, desktop tools and experiments —
             handcrafted, useful, and a little curious.
         </p>
 
-        <div class="hero__actions reveal reveal--delay-4">
-            <a class="btn btn--primary"
-               href="@ProjectService.DenHomeUrl"
-               target="_blank"
-               rel="noopener noreferrer">
-                Enter the Den
-            </a>
-            <a class="btn btn--ghost"
-               href="@ProjectService.GitHubProfileUrl"
-               target="_blank"
-               rel="noopener noreferrer">
-                GitHub
-            </a>
+        <div class="door-search">
+            <label class="door-search__field">
+                <span class="visually-hidden">Search apps, websites, tools, or projects</span>
+                <input id="hero-search"
+                       type="search"
+                       placeholder="Search apps, websites, tools, or projects..."
+                       autocomplete="off"
+                       spellcheck="false"
+                       value="@_query"
+                       @oninput="OnQuery"
+                       @onkeydown="OnKey" />
+                <kbd>Ctrl K</kbd>
+            </label>
+            @if (_results.Count > 0)
+            {
+                <ul class="door-search__results" role="listbox">
+                    @foreach (var hit in _results)
+                    {
+                        <li>
+                            <a href="@hit.Url" target="_blank" rel="noopener noreferrer">
+                                <strong>@hit.Title</strong>
+                                <em>@hit.Kind</em>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+            else if (_query.Trim().Length > 0)
+            {
+                <p class="door-search__empty">Nothing in the workshop matches that.</p>
+            }
         </div>
+
+        @if (_chips.Count > 0)
+        {
+            <p class="door-chips" aria-label="Popular projects">
+                <span>Popular</span>
+                @foreach (var chip in _chips)
+                {
+                    <a href="@chip.Url" target="_blank" rel="noopener noreferrer">@chip.Title</a>
+                }
+            </p>
+        }
+
+        <ul class="door-stats">
+            <li>
+                <Mark Name="box" />
+                <span class="door-stat"><strong>@_projectCount</strong><span>Projects</span></span>
+            </li>
+            <li>
+                <Mark Name="screen" />
+                <span class="door-stat"><strong>@_destinationCount</strong><span>Live products</span></span>
+            </li>
+            <li>
+                <Mark Name="spark" />
+                <span class="door-stat"><strong>∞</strong><span>Ideas in progress</span></span>
+            </li>
+            <li>
+                <img class="door-stat__fox" src="images/independent-fox.png" alt="" width="28" height="28" />
+                <span class="door-stat"><strong>1</strong><span>Independent fox</span></span>
+            </li>
+        </ul>
     </div>
 </section>
+
+@code {
+    private static readonly string[] ChipIds = ["ffs", "huntress-cookbook", "streamforge", "foxfill"];
+
+    private readonly Timer _timer;
+    private string _slot;
+    private string? _outgoing;
+    private string _query = "";
+    private int _projectCount;
+    private int _destinationCount;
+    private IReadOnlyList<LabSearchHit> _hits = [];
+    private IReadOnlyList<LabSearchHit> _chips = [];
+    private IReadOnlyList<LabSearchHit> _results = [];
+    private CancellationTokenSource? _fade;
+
+    public HeroSection()
+    {
+        _slot = WorkshopClock.Slot(DateTime.Now);
+        _timer = new Timer(_ => _ = InvokeAsync(Tick), null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(30));
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var destinations = await Projects.GetDestinationsAsync();
+        var projects = await Projects.GetProjectsAsync();
+        _hits = LabSearch.Build(destinations, projects);
+        _chips = ChipIds
+            .Select(id => _hits.FirstOrDefault(hit => hit.Id.Equals(id, StringComparison.OrdinalIgnoreCase)))
+            .Where(hit => hit is not null)
+            .Cast<LabSearchHit>()
+            .ToList();
+        _projectCount = projects.Count;
+        _destinationCount = destinations.Count(d => !string.IsNullOrWhiteSpace(d.Url));
+    }
+
+    private void OnQuery(ChangeEventArgs e)
+    {
+        _query = e.Value?.ToString() ?? "";
+        var query = _query.Trim();
+        _results = query.Length == 0
+            ? []
+            : _hits.Where(hit => LabSearch.Matches(hit, query)).Take(6).ToList();
+    }
+
+    private void OnKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            _query = "";
+            _results = [];
+        }
+        else if (e.Key == "Enter" && _results.Count > 0)
+        {
+            _ = Js.InvokeVoidAsync("open", _results[0].Url, "_blank", "noopener");
+        }
+    }
+
+    private void Tick()
+    {
+        var next = WorkshopClock.Slot(DateTime.Now);
+        if (next == _slot)
+            return;
+
+        _outgoing = _slot;
+        _slot = next;
+        _fade?.Cancel();
+        _fade = new CancellationTokenSource();
+        var token = _fade.Token;
+        _ = ClearOutgoingAsync(token);
+        StateHasChanged();
+    }
+
+    private async Task ClearOutgoingAsync(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(700, token);
+            _outgoing = null;
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (TaskCanceledException)
+        {
+            // a newer fade replaced this one
+        }
+    }
+
+    public void Dispose()
+    {
+        _timer.Dispose();
+        _fade?.Cancel();
+        _fade?.Dispose();
+    }
+}

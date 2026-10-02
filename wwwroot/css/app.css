@@ -3,15 +3,15 @@
    ========================================================================== */
 
 :root {
-    --color-bg: #0c1410;
-    --color-bg-deep: #08100c;
-    --color-surface: #152019;
-    --color-surface-raised: #1c2a22;
-    --color-border: rgba(242, 239, 232, 0.09);
-    --color-border-strong: rgba(242, 239, 232, 0.16);
-    --color-text: #f2efe8;
-    --color-text-muted: #a3b0a8;
-    --color-text-soft: #7f8f86;
+    --color-bg: #1a2822;
+    --color-bg-deep: #14201b;
+    --color-surface: #1c2c25;
+    --color-surface-raised: #24362d;
+    --color-border: rgba(242, 239, 232, 0.12);
+    --color-border-strong: rgba(242, 239, 232, 0.18);
+    --color-text: #f3ebe0;
+    --color-text-muted: #bbc0b7;
+    --color-text-soft: #9aa89f;
     --color-accent: #e08a45;
     --color-accent-hover: #eba05f;
     --color-accent-soft: #c9a06a;
@@ -84,6 +84,10 @@ h1, h2, h3 {
     margin: 0;
 }
 
+h1:focus {
+    outline: none;
+}
+
 p {
     margin: 0;
 }
@@ -98,7 +102,7 @@ p {
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.035;
+    opacity: 0.05;
     background-image:
         linear-gradient(rgba(242, 239, 232, 0.9) 1px, transparent 1px),
         linear-gradient(90deg, rgba(242, 239, 232, 0.9) 1px, transparent 1px);
@@ -961,7 +965,7 @@ main {
 
 .loading-progress circle {
     fill: none;
-    stroke: rgba(242, 239, 232, 0.12);
+    stroke: rgba(47, 74, 60, 0.85);
     stroke-width: 0.55rem;
     transform-origin: 50% 50%;
     transform: rotate(-90deg);
